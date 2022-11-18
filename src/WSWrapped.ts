@@ -1,4 +1,4 @@
-import WSCommon from "./WSCommon";
+import WSLike from "./WSLike";
 
 
 // Using 64 bit prefixes.
@@ -7,7 +7,7 @@ import WSCommon from "./WSCommon";
 
 export default class WSWrapped {
     constructor(
-        private ws:WSCommon,
+        private ws:WSLike,
     ) {
         this.linkEvents();
     }

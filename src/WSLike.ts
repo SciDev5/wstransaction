@@ -1,4 +1,4 @@
-export default interface WSCommon {
+export default interface WSLike {
     addEventListener(
         type:"message",
         listener:(e:MessageEvent<string|Blob|ArrayBuffer>)=>void,

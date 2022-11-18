@@ -1,10 +1,12 @@
 {
   "name": "wstransaction",
   "version": "1.0.0",
-  "description": "",
+  "description": "Control flow based communication for WebSocket-like connections.",
   "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
-    "test": "jest --watch"
+    "test": "jest --watch",
+    "prepack": "tsc"
   },
   "author": "SciDev5",
   "license": "ISC",

@@ -1,5 +1,6 @@
 import WSWrapped from "./WSWrapped";
 import { EPromise } from "@scidev5/util-h";
+import WSLike from "./WSLike";
 
 type WSTransactionHandler<T> = (transaction:WSTransaction)=>Promise<T>;
 
@@ -7,6 +8,10 @@ export default class WSTransactor {
     constructor(readonly ws:WSWrapped) {
         ws.handleMessage.add(this.onMessage);
         ws.handleClose.add(this.onClose);
+    }
+    /** Wrap the websocket and return a transactor for it. */
+    static wrap(wsLike:WSLike) {
+        return new WSTransactor(new WSWrapped(wsLike));
     }
 
     private readonly onClose = (code?:number)=>{
@@ -100,7 +105,7 @@ export default class WSTransactor {
     }
 
     private readonly routes:{[routeName:string]:WSTransactionHandler<void>} = {};
-    route(name:string,handler:WSTransactionHandler<void>) {
+    listen(name:string,handler:WSTransactionHandler<void>) {
         this.checkRouteName(name);
         this.routes[name] = handler;
     }

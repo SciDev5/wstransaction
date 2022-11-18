@@ -1,6 +1,6 @@
-import { WSTransaction } from "./WSTransactor";
+import WSTransactor, { WSTransaction } from "./WSTransactor";
 import WSWrapped from "./WSWrapped";
-import WSCommon from "./WSCommon";
+import WSLike from "./WSLike";
 
-export default WSTransaction;
-export { WSWrapped, WSCommon };
+export default WSTransactor;
+export { WSWrapped, WSLike, WSTransaction };

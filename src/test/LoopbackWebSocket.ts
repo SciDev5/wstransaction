@@ -1,6 +1,6 @@
-import WSCommon from "../WSCommon";
+import WSLike from "../WSLike";
 
-export default class LoopbackWebSocket implements WSCommon {
+export default class LoopbackWebSocket implements WSLike {
     constructor(readonly protocol:string) {
         setImmediate(()=>{
             this.open();
