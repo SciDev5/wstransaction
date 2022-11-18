@@ -41,7 +41,7 @@ export default interface WSLike {
         listener:(e:Event)=>void,
     ):void;
 
-    send(data:string|Blob):void;
+    send(data:string|Blob|ArrayBuffer):void;
 
     close(code?:number,reason?:string):void;
 

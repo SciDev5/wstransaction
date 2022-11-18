@@ -78,18 +78,19 @@ export default class WSWrapped {
         const ws = this.ws;
         ws.addEventListener("message",this.onmessage);
 
-        if (!this.closingOrClosed)
+        if (!this.closingOrClosed) {
             ws.addEventListener("close",(e)=>{
                 if (this.ws === ws) this.onclose(e);
                 ws.removeEventListener("message",this.onmessage);
             },{once:true});
-        else if (callPassedEvents)
+        } else if (callPassedEvents) {
             this.onclose(null);
+            ws.removeEventListener("message", this.onmessage);
+        }
 
         if (!this.hasOpened)
             ws.addEventListener("open",(e)=>{
                 if (this.ws === ws) this.onopen(e);
-                ws.removeEventListener("message",this.onmessage);
             },{once:true});
         else if (callPassedEvents)
             this.onopen(null);
@@ -127,7 +128,7 @@ export default class WSWrapped {
     ) {
         const prefixArray = new Uint8Array(new BigUint64Array([prefix]).buffer);
 
-        const merged = new Blob([prefixArray,data]);
+        const merged = new Uint8Array([...prefixArray,...new Uint8Array(data)]).buffer;
         this.ws.send(merged);
     }
     sendStr(

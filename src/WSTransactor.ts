@@ -11,8 +11,8 @@ export default class WSTransactor {
         ws.handleClose.add(this.onClose);
     }
     /** Wrap the websocket and return a transactor for it. */
-    static wrap(wsLike:WSLike|NodeWebsocket) {
-        return new WSTransactor(new WSWrapped(wsLike));
+    static wrap(wsLike:WSLike|NodeWebsocket,subProtocols?:string[]) {
+        return new WSTransactor(new WSWrapped(wsLike,subProtocols));
     }
 
     private readonly onClose = (code?:number)=>{
@@ -120,7 +120,7 @@ export default class WSTransactor {
         const id = this.genTransactionId(), handled = new EPromise<Promise<T>>();
 
         this.requestedTransactions.set(id,[handler,handled as never]);
-        this.sendControlCommand("+",name,id.toString(16));
+        this.sendControlCommand("+",id.toString(16),name);
 
         return await handled;
     }
