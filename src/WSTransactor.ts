@@ -1,7 +1,7 @@
 import WSWrapped from "./WSWrapped";
-import { EPromise } from "@scidev5/util-h";
 import WSLike from "./WSLike";
 import { WebSocket as NodeWebsocket } from "ws";
+import { EPromise } from "./util/EPromise";
 
 type WSTransactionHandler<T> = (transaction:WSTransaction)=>Promise<T>;
 
@@ -119,7 +119,7 @@ export default class WSTransactor {
 
         const id = this.genTransactionId(), handled = new EPromise<Promise<T>>();
 
-        this.requestedTransactions.set(id,[handler,handled]);
+        this.requestedTransactions.set(id,[handler,handled as never]);
         this.sendControlCommand("+",name,id.toString(16));
 
         return await handled;
