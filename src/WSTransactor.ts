@@ -10,7 +10,7 @@ export default class WSTransactor {
         ws.handleClose.add(this.onClose);
     }
     /** Wrap the websocket and return a transactor for it. */
-    static wrap(wsLike:WSLike) {
+    static wrap(wsLike:WSLike|WebSocket) {
         return new WSTransactor(new WSWrapped(wsLike));
     }
 

@@ -1,7 +1,11 @@
+export interface MessageEventLike {
+    data: string | Buffer | ArrayBuffer | Buffer[] | Blob;
+}
+
 export default interface WSLike {
     addEventListener(
         type:"message",
-        listener:(e:MessageEvent<string|Blob|ArrayBuffer>)=>void,
+        listener:(e:MessageEventLike)=>void,
         options?:{once?:boolean},
     ):void;
     addEventListener(

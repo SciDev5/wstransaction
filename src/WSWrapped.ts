@@ -1,14 +1,17 @@
-import WSLike from "./WSLike";
-
+import { WebSocket as NodeWebsocket } from "ws";
+import WSLike, { MessageEventLike } from "./WSLike";
 
 // Using 64 bit prefixes.
 // for 32 bit, 50% chance of collision in 77k requests, may collide
 // for 64 bit, 50% chance of collision in 5 billion requests, probably never going to collide
 
 export default class WSWrapped {
+    private ws:WSLike;
     constructor(
-        private ws:WSLike,
+        ws:WSLike|NodeWebsocket,
     ) {
+        ws.binaryType = "arraybuffer";
+        this.ws = ws as WSLike;
         this.linkEvents();
     }
 
@@ -100,9 +103,9 @@ export default class WSWrapped {
         this.handleOpenOnce.forEach(h=>h());
         this.handleOpenOnce.clear();
     };
-    private readonly onmessage = async (e:MessageEvent)=>{
-        if (e.data instanceof Blob) {
-            const {prefix,data} = this.splitReceivedToStr(await e.data.arrayBuffer());
+    private readonly onmessage = async ({data:dataBoth}:MessageEventLike)=>{
+        if (dataBoth instanceof ArrayBuffer) {
+            const {prefix,data} = this.splitReceivedToStr(dataBoth);
             this.handleMessage.forEach(v=>v(prefix,data));
         } else {
             this.fail(WSWrapped.CLOSE_CODE.UNPROCESSABLE_DATA);
@@ -148,8 +151,8 @@ export default class WSWrapped {
 
 
     private fail(code:CloseCode):never {
-        this.ws.close(code,WSWrapped.CLOSE_REASON[code]);
-        throw new Error("WebSocket Connection Failed: "+WSWrapped.CLOSE_REASON[code]);
+        this.ws.close(code,"[WSTransaction]"+WSWrapped.CLOSE_REASON[code]);
+        throw new Error("WSTransaction WebSocket connection terminated: "+WSWrapped.CLOSE_REASON[code]);
     }
 
     static readonly CLOSE_CODE = {
