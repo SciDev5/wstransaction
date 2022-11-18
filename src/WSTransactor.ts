@@ -1,6 +1,7 @@
 import WSWrapped from "./WSWrapped";
 import { EPromise } from "@scidev5/util-h";
 import WSLike from "./WSLike";
+import { WebSocket as NodeWebsocket } from "ws";
 
 type WSTransactionHandler<T> = (transaction:WSTransaction)=>Promise<T>;
 
@@ -10,7 +11,7 @@ export default class WSTransactor {
         ws.handleClose.add(this.onClose);
     }
     /** Wrap the websocket and return a transactor for it. */
-    static wrap(wsLike:WSLike|WebSocket) {
+    static wrap(wsLike:WSLike|NodeWebsocket) {
         return new WSTransactor(new WSWrapped(wsLike));
     }
 
