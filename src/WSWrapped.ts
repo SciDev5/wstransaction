@@ -9,6 +9,7 @@ export default class WSWrapped {
     private ws:WSLike;
     constructor(
         ws:WSLike|NodeWebsocket,
+        private readonly reconnectProtocols?:string[],
     ) {
         ws.binaryType = "arraybuffer";
         this.ws = ws as WSLike;
@@ -23,7 +24,7 @@ export default class WSWrapped {
         if (!this.closingOrClosed)
             ws.close(1000,"reconnect");
 
-        this.ws = new WebSocket(ws.url,ws.protocol);
+        this.ws = new WebSocket(ws.url,ws.protocol||this.reconnectProtocols);
         this.linkEvents();
     }
     async autoReconnect(
@@ -42,8 +43,6 @@ export default class WSWrapped {
     ) {
         let backoffCooldown = backoffConfig.initialCooldown;
         while (condition.looping) {
-            this.reconnect();
-
             await Promise.race([
                 this.untilOpen,
                 this.untilClose,
@@ -56,6 +55,9 @@ export default class WSWrapped {
                 backoffCooldown = Math.min(backoffCooldown * backoffConfig.factor, backoffConfig.maxCooldown);
 
             await this.untilClose;
+
+            await {then(res:()=>void){setTimeout(res,backoffCooldown)}};
+            this.reconnect();
         }
     }
 
