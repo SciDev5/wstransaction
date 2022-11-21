@@ -28,11 +28,11 @@ export default class WSTransactor {
                 const [transactionIdStr,routeName] = args, transactionId = BigInt("0x"+transactionIdStr);
 
                 if (routeName in this.routes) {
+                    this.sendControlCommand("*",transactionIdStr);
                     this.createAndAddTransaction(
                         transactionId,
                         this.routes[routeName],
                     );
-                    this.sendControlCommand("*",transactionIdStr);
                 } else {
                     this.sendControlCommand("x",transactionIdStr);
                 }
