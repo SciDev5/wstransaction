@@ -9,6 +9,8 @@ export default class WSTransactor {
     constructor(readonly ws:WSWrapped) {
         ws.handleMessage.add(this.onMessage);
         ws.handleClose.add(this.onClose);
+
+        this.sendQueryHello(); // In case the remote end is already ready and we missed it's `hello`
     }
     /** Wrap the websocket and return a transactor for it. */
     static wrap(wsLike:WSLike|NodeWebsocket,subProtocols?:string[]) {
@@ -24,6 +26,17 @@ export default class WSTransactor {
             // Control command
             const which = data[0], args = data.substring(1).split("\n");
             switch(which) {
+            case "h":{ // Hello command
+                if (!this.alreadyReceivedHello)
+                    this._receivedHello.res();
+                this.alreadyReceivedHello = true;
+                break;
+            }
+            case "q":{ // QueryHello command, replies with hello if ready (in case missed during boot)
+                if (this.alreadySentHello)
+                    this.sendHello();
+                break;
+            }
             case "+":{ // Requesting new transaction
                 const [transactionIdStr,routeName] = args, transactionId = BigInt("0x"+transactionIdStr);
 
@@ -74,7 +87,7 @@ export default class WSTransactor {
             // Not found.
         }
     };
-    private sendControlCommand(which:"+"|"*"|"x"|"-",...args:string[]) {
+    private sendControlCommand(which:"h"|"q"|"+"|"*"|"x"|"-",...args:string[]) {
         this.ws.sendStr(
             BigInt(0),
             which + args.join("\n"),
@@ -115,6 +128,8 @@ export default class WSTransactor {
     private readonly requestedTransactions = new Map<bigint, [WSTransactionHandler<unknown>,EPromise<Promise<unknown>>]>;
     private readonly activeTransactions = new Map<bigint, WSTransaction>;
     async do<T>(name:string,handler:WSTransactionHandler<T>) {
+        this.throwIfNoHello();
+
         this.checkRouteName(name);
 
         const id = this.genTransactionId(), handled = new EPromise<Promise<T>>();
@@ -124,6 +139,23 @@ export default class WSTransactor {
 
         return await handled;
     }
+
+    private readonly _receivedHello = new EPromise<void>();
+    private alreadyReceivedHello = false;
+    private alreadySentHello = false;
+    readonly receivedHello = this._receivedHello.then();
+    sendHello() {
+        this.sendControlCommand("h"); // allow double send to get around race condition at startup
+        this.alreadySentHello = true;
+    }
+    private throwIfNoHello() {
+        if (!this.alreadyReceivedHello || !this.alreadySentHello)
+            throw new Error("Cannot start transaction before `hello` command both sent to and received from remote");
+    }
+    private sendQueryHello() {
+        this.sendControlCommand("q");
+    }
+
 }
 
 export class WSTransaction {
