@@ -2,7 +2,7 @@
 src/
 
 .eslintrc.json
-jest.config.js
+jest.config.ts
 tsconfig.json
 
 .test.js
