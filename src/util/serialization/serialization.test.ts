@@ -1,17 +1,15 @@
-import { BooleanSerializationAction } from './actions/bool'
-import { NumberSerializationAction } from './actions/number'
-import { StringSerializationAction } from './actions/string'
+import { primitive } from './actions/primitive'
 import { SeriX, SerializationProfile } from './serialization'
 
 type D = [string, number, boolean, number, number]
 class RGBColorSerializationProfile extends SerializationProfile<RGBColor, D> {
   constructor () {
     super([
-      StringSerializationAction.default,
-      NumberSerializationAction.default,
-      BooleanSerializationAction.default,
-      NumberSerializationAction.default,
-      NumberSerializationAction.default,
+      primitive.string.action,
+      primitive.number.action,
+      primitive.boolean.action,
+      primitive.number.action,
+      primitive.number.action,
     ])
   }
 

@@ -1,14 +1,18 @@
 import { ByteArraySlice } from '../ByteArraySlice'
 
 export class SeriX<T> {
-  constructor (private readonly act: SerializationAction<T>) {}
+  constructor (readonly action: SerializationAction<T>) {}
 
   toBin (data: T): ArrayBuffer {
-    return new Uint8Array(this.act.serialize(data)).buffer
+    return new Uint8Array(this.action.serialize(data)).buffer
+  }
+
+  toBinJsArr (data: T): number[] {
+    return this.action.serialize(data)
   }
 
   fromBin (data: ArrayBuffer): T {
-    return this.act.deserialize(new ByteArraySlice(new Uint8Array(data))).data
+    return this.action.deserialize(new ByteArraySlice(new Uint8Array(data))).data
   }
 }
 
