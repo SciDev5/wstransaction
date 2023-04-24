@@ -1,9 +1,16 @@
 export class Updates {
-  readonly sendUpdate: () => void
+  private readonly resolvers = new Set<() => void>()
   readonly update: { then: (res: () => void) => void }
+
+  sendUpdate (): void {
+    const resolvers = [...this.resolvers]
+    this.resolvers.clear()
+    for (const fn of resolvers) {
+      fn()
+    }
+  }
+
   constructor () {
-    let resFn = (): void => { }
-    this.update = { then (res: () => void) { resFn = res } }
-    this.sendUpdate = resFn
+    this.update = { then: (res: () => void) => { this.resolvers.add(res) } }
   }
 }

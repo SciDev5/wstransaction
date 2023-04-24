@@ -57,6 +57,9 @@ export class WSTransactor {
 
   private readonly untilReceivedHello = new EPromise<void>()
 
+  private _helloReceived = false
+  public get helloReceived (): boolean { return this._helloReceived }
+
   constructor (
     private readonly ws: WS,
     initialHandles: Array<WSTransactionHandle<void>>,
@@ -94,6 +97,8 @@ export class WSTransactor {
 
   private async exec (): Promise<void> {
     await this.ws.opened
+    this.sendMessage(TxrMessageWhich.HELLO, 0, [])
+
     for await (const message of this.ws.watch()) {
       this.handleMessage(message)
     }
@@ -135,10 +140,12 @@ export class WSTransactor {
     switch (which) {
       case TxrMessageWhich.HELLO: {
         this.sendMessage(TxrMessageWhich.HELLO_ACK, 0, [])
+        this._helloReceived = true
         this.untilReceivedHello.res()
         break
       }
       case TxrMessageWhich.HELLO_ACK: {
+        this._helloReceived = true
         this.untilReceivedHello.res()
         break
       }
@@ -225,9 +232,9 @@ export class WSTransactor {
 export type WSTransactionFunction<T> = (s: WSTransactionIO) => Promise<T>
 
 class Transaction<T> {
-  private readonly scope = new WSTransactionIO(this as Transaction<any>)
-
   readonly dataReceive = new Channel<ByteArraySlice>()
+
+  private readonly scope = new WSTransactionIO(this as Transaction<any>)
 
   private resR = (v: T): void => {}
   private rejR = (e: any): void => {}

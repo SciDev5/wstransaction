@@ -1,4 +1,4 @@
-import { RawWS, type RawWSLike, RawWSState, WS } from './WS'
+import { RawWS, type RawWSLike, RawWSState, WS, CloseInfo } from './WS'
 import { WSTransactionHandle, WSTransactor, WSTransactionIO, type WSTransactionFunction } from './WSTransaction'
 import { ByteArraySlice } from './util/ByteArraySlice'
 import { BooleanSerializationAction } from './util/serialization/actions/bool'
@@ -18,6 +18,7 @@ export {
   RawWS,
   type RawWSLike,
   RawWSState,
+  CloseInfo,
 
   // SeriX serialization
   SeriX,

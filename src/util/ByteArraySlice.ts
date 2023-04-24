@@ -50,7 +50,7 @@ export class ByteArraySlice {
     this.verifySliceBounds(start, length)
     return this.innerArray.slice(
       this.sliceStart + start,
-      start + length,
+      this.sliceStart + start + length,
     )
   }
 }

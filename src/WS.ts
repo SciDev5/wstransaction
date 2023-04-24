@@ -83,17 +83,28 @@ export class WS {
   constructor (private readonly ws: RawWSLike) {
     this.opened = new Promise((resolve: (v?: undefined) => void) => { this.markOpen = resolve })
     this.closed = new Promise((resolve: (v: CloseInfo) => void) => { this.markClosed = resolve })
-    ws.onOpen(() => {
-      this.markOpen()
-    })
-    ws.onClose(info => {
-      this.isClosed = true
-      this.msgOrClose.sendUpdate()
-      this.markClosed(info)
-    })
     ws.onMessage(data => {
       this.receiveQueue.push(data)
+      this.msgOrClose.sendUpdate()
     })
+    if (ws.state === RawWSState.CONNECTING) {
+      ws.onOpen(() => {
+        this.markOpen()
+      })
+    } else {
+      this.markOpen()
+    }
+    if (ws.state === RawWSState.CLOSED) {
+      this.isClosed = true
+      this.msgOrClose.sendUpdate()
+      this.markClosed(new CloseInfo(1006, 'already closed'))
+    } else {
+      ws.onClose(info => {
+        this.isClosed = true
+        this.msgOrClose.sendUpdate()
+        this.markClosed(info)
+      })
+    }
   }
 
   async * watch (): AsyncGenerator<ArrayBuffer, void, unknown> {
@@ -102,8 +113,13 @@ export class WS {
     }
     this.isWatched = true
 
+    let first = true
     while (!this.isClosed) {
-      await this.msgOrClose.update
+      if (first) {
+        first = false
+      } else {
+        await this.msgOrClose.update
+      }
 
       const allReceived = this.receiveQueue.splice(0, this.receiveQueue.length)
       for (const received of allReceived) {
@@ -120,7 +136,8 @@ export class WS {
     this.ws.close(info)
   }
 }
-class CloseInfo {
+
+export class CloseInfo {
   constructor (readonly code: number, readonly reason: string) {}
   static readonly default = new CloseInfo(1000, '')
 }
