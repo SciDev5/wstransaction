@@ -6,6 +6,24 @@ This library does not care whether it's on the client or server side (it's symme
 
 > TODO: full documentation
 
+## Runtime guarantees
+
+- No uncaught exeptions will be thrown as a result of `WSTransactor.constructor` or `[object WSTransactor].handle`
+
+- Transactions started before connection will be fufilled on open.
+
+- Invalid received WSTransaction packets will never cause an uncaught error (SeriX serialization has litle checking however and will confuse same-size types; TODO: Debug/Safe Mode).
+
+- Transactions fail if:
+  - An error ocurrs in the handler.
+  - Messages are sent or received in a mismatched order.
+
+- Failed transactions will:
+  - throw from `[object WSTransaction].do`
+  - catch in `[object WSTransaction].handle`
+  - log a warning message
+
+
 ## General usage
 
 ```typescript
@@ -25,6 +43,8 @@ const listener = new WSTransactionHandle(
 )
 
 const transactor = WSTransactor.wrap(websocket, [
+  // Each one of these is equivalent to `handle(...)` but
+  // it guarantees it is called before the 'HELLO' packet is sent.
   listener,
 ])
 // alternatively, the constructor may be called manually:
