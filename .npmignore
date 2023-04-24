@@ -1,8 +1,14 @@
-# node_modules/
 src/
 
+# configuration
+.vscode/
 .eslintrc.json
 jest.config.ts
 tsconfig.json
 
-.test.js
+# testing
+dist/src/test/
+*.test.js
+*.test.d.ts
+jest.config.d.ts
+jest.config.js
