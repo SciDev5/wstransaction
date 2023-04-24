@@ -167,8 +167,10 @@ export class WSTransactor {
         const tx = this.genTransaction(handle, txId)
         this.transactions.set(txId, tx)
         tx.value.catch(() => {}) // void errors, handled at `this.handleTransactionError`
-        tx.run()
+
         this.sendMessage(TxrMessageWhich.BEGIN_ACK, txId, [])
+
+        tx.run()
         break
       }
       case TxrMessageWhich.BEGIN_ACK: {

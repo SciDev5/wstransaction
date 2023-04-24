@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest",
     "test-watch": "jest --watch",
-    "prepack": "tsc"
+    "prepack": "jest && tsc"
   },
   "author": "SciDev5",
   "license": "ISC",
